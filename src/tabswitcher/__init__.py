@@ -19,6 +19,9 @@ from .fuzzySearch import fuzzy_search_cmd, fuzzy_search_py
 script_dir = os.path.dirname(os.path.realpath(__file__))
 settings = Settings()
 
+config_dir = os.path.expanduser('~/.tabswitcher')
+tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
+
 class MainWindow(QWidget):
 
     def checkFocus(self, old, new):
@@ -67,7 +70,7 @@ class MainWindow(QWidget):
         self.layout = QVBoxLayout()
 
         self.resize(700, 500)
-        font_path = os.path.join(script_dir, '..', 'assets', "sans.ttf")
+        font_path = os.path.join(script_dir, 'assets', "sans.ttf")
         font = QFont(font_path, 10)  # adjust the size as needed
         self.setFont(font)
         # Create a QLineEdit
@@ -165,7 +168,6 @@ class MainWindow(QWidget):
 
     def get_last_active_tabs(self):
         try:
-            tab_history_path = os.path.join(script_dir, settings.get_tab_logging_file())
             with open(tab_history_path, 'rb') as f:
                 return pickle.load(f)
         except FileNotFoundError:

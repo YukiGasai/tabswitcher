@@ -5,7 +5,9 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 
 class Settings:
     def __init__(self):
-        self.config_file = os.path.join(script_dir, 'settings.ini')
+        config_dir = os.path.expanduser('~/.tabswitcher')
+        os.makedirs(config_dir, exist_ok=True)
+        self.config_file = os.path.join(config_dir, 'settings.ini')
         self.config = configparser.ConfigParser()
         if not os.path.exists(self.config_file):
             self.create_default_settings()

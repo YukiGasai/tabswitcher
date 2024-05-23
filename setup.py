@@ -13,7 +13,9 @@ class PostInstallCommand(install):
 setup(
     name='tabswitcher',
     version='0.1',
-    packages=find_packages(),
+    packages=['tabswitcher'],
+    package_dir={'tabswitcher': 'src/tabswitcher'},
+    package_data={'tabswitcher': ['assets/*']},
     description="A tool for efficient browser tab switching outside the browser",
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
@@ -22,7 +24,7 @@ setup(
     url='https://github.com/YukiGasai/tabswitcher',
     entry_points={
         'console_scripts': [
-            'tabswitcher=src.__init__:main',
+            'tabswitcher=tabswitcher.__init__:main',
         ],
     },
     cmdclass={

@@ -14,7 +14,7 @@ class SearchInput(QLineEdit):
 
         # Create a QToolButton
         button = QToolButton()
-        icon_path = os.path.join(script_dir, '..', 'assets', 'searchIcon.svg')
+        icon_path = os.path.join(script_dir, 'assets', 'searchIcon.svg')
         button.setIcon(QIcon(icon_path))
         button.setIconSize(QSize(32, 32))
         button.setEnabled(False)
@@ -29,7 +29,7 @@ class SearchInput(QLineEdit):
         widget.setStyleSheet("background:transparent;")
         self.setLayout(layout)
         self.settings = Settings()
-        font_path = os.path.join(script_dir, '..', 'assets', "sans.ttf")
+        font_path = os.path.join(script_dir, 'assets', "sans.ttf")
         font_id = QFontDatabase.addApplicationFont(font_path)
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         # Set the font

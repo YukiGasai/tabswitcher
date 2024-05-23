@@ -6,12 +6,13 @@ import threading
 from collections import deque
 import pickle
 
-from src.Settings import Settings
-from src.brotab import active_tab
+from tabswitcher.Settings import Settings
+from tabswitcher.brotab import active_tab
 
 settings = Settings()
-script_dir = os.path.dirname(os.path.realpath(__file__))
-tab_history_path = os.path.join(script_dir, settings.get_tab_logging_file())
+
+config_dir = os.path.expanduser('~/.tabswitcher')
+tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
 
 tabHistory = deque(maxlen=settings.get_tab_logging_max())
 counter = 0
