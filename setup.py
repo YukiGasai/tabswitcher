@@ -12,7 +12,7 @@ class PostInstallCommand(install):
 
 setup(
     name='tabswitcher',
-    version='0.1',
+    version='0.0.1',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
