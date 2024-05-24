@@ -2,7 +2,7 @@ import os
 import pickle
 
 import sys
-from PyQt5.QtGui import QFont, QCursor, QKeySequence, QDesktopServices
+from PyQt5.QtGui import QFont, QCursor, QKeySequence, QDesktopServices, QIcon
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtNetwork import QNetworkAccessManager
@@ -56,7 +56,9 @@ class MainWindow(QWidget):
             shortcut = QShortcut(QKeySequence("Ctrl+" + str(i)), self)
             shortcut.activated.connect(lambda i=i: self.open_recent_tab(i))
 
-
+        self.setWindowTitle('TabSwitcher')
+        icon_path = os.path.join(script_dir, 'assets', "Icon.ico")
+        self.setWindowIcon(QIcon(icon_path))
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.settings = Settings()
         if self.settings.get_show_background() == False:
@@ -98,6 +100,9 @@ class MainWindow(QWidget):
 
     def killTabLogger(self):
         proc = get_process("logTabs.py")
+        if proc is not None:
+            proc.kill()
+        proc = get_process("bt_mediator.exe")
         if proc is not None:
             proc.kill()
         self.close()

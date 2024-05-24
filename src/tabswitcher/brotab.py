@@ -1,6 +1,5 @@
 
 import subprocess
-from typing import Counter
 import chardet
 
 from .Tab import Tab
@@ -10,14 +9,16 @@ def get_tabs(manager):
     lines = output.strip().split('\n')
     lines = [line for line in lines if len(line)]
     
+    titles = [line.split('\t')[1] for line in lines]
+
     # Check if there are duplicate titles 
-    title_counts = Counter(line.split('\t')[1] for line in lines)
+    duplicate_titles = set(title for title in titles if titles.count(title) > 1)
 
     tabs = {}
     for line in lines:
         id, title, url = line.split('\t')
         # To prevent the same key add the id to dublicate titles 
-        if title_counts[title] > 1:
+        if title in duplicate_titles:
             title = f"{id} : {title}"
         tab = Tab(id, title, url, manager)
         tabs[title] = tab

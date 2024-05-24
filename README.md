@@ -11,9 +11,19 @@ A simple window for switching between tabs in a browser. Using the `brotab` exte
 
 ## Install
 
+1. Install package
+
 ```bash
 pip install tabswitcher
 ```
+
+1. Install the mediator in the browser
+
+```bash
+bt install
+```
+
+1. Restart the browser
 
 ## Problems
 

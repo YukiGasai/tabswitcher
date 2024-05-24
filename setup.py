@@ -1,18 +1,8 @@
-from setuptools import setup, find_packages
-from setuptools.command.install import install
-import subprocess
-
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
-    def run(self):
-        install.run(self)
-        # put your post-install command here
-        subprocess.call(['bt', 'install'], shell=True)
-        print('Install the BroTab extension and restart your browser to use tabswitcher.')
+from setuptools import setup
 
 setup(
     name='tabswitcher',
-    version='0.0.1',
+    version='0.0.2',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
@@ -27,19 +17,27 @@ setup(
             'tabswitcher=tabswitcher.__init__:main',
         ],
     },
-    cmdclass={
-        'install': PostInstallCommand,
-    },
     license='AGPL-3.0',
-    classifiers=[],
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU Affero General Public License v3',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+    ],
     keywords='tabswitcher, browsertool, tool',
     install_requires=[
-        'chardet',
+        'chardet<4',
+        'werkzeug<3.0',
+        'psutil==5.8.0',
         'fuzzywuzzy',
-        'psutil',
         'PyQt5',
         'schedule',
         'brotab',
-        'werkzeug<3.0',
     ],
 )
