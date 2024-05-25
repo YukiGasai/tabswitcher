@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tabswitcher',
-    version='0.0.8',
+    version='0.0.9',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
