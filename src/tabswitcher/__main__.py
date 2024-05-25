@@ -27,7 +27,7 @@ tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
 
 def open_settings():
     # Open the configuration file in the default text editor
-    QDesktopServices.openUrl(QUrl.fromLocalFile(settings.config_file))
+    os.startfile(settings.config_file)
 
 class MainWindow(QWidget):
 
