@@ -23,6 +23,10 @@ if '%errorlevel%' NEQ '0' (
     pushd "%CD%"
     CD /D "%~dp0"
 
+
+:: Insatll the mediator in the browser
+call bt install
+
 :: Create a scheduled task to run the BroTab Service
 echo Creating scheduled task for BroTab Service
 set "XML_PATH=%SCRIPT_DIR%/brotab_service.xml"

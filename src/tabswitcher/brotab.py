@@ -2,10 +2,18 @@
 import subprocess
 import chardet
 
+from .Settings import Settings
 from .Tab import Tab
 
+settings = Settings()
+
+def get_url():
+    if settings.get_use_firefox():
+        return '127.0.0.1:4625'
+    return '127.0.0.1:4626'
+
 def get_tabs(manager):
-    output = subprocess.check_output(['bt', '--target', '127.0.0.1:4625', 'list']).decode()
+    output = subprocess.check_output(['bt', '--target', get_url(), 'list']).decode()
     lines = output.strip().split('\n')
     lines = [line for line in lines if len(line)]
     
@@ -26,15 +34,15 @@ def get_tabs(manager):
     return tabs
 
 def switch_tab(tab_id):
-    subprocess.call(['bt', '--target', '127.0.0.1:4625', 'activate', tab_id])
+    subprocess.call(['bt', '--target', get_url(), 'activate', tab_id])
 
 def delete_tab(tab_id):
-    subprocess.call(['bt', '--target', '127.0.0.1:4625', 'close', tab_id])
+    subprocess.call(['bt', '--target', get_url(), 'close', tab_id])
 
 
 def seach_tab(manager, text):
-    _ = subprocess.check_output(['bt', '--target', '127.0.0.1:4625', 'index']).decode()
-    output_bytes = subprocess.check_output(['bt', '--target', '127.0.0.1:4625', 'search', text])
+    _ = subprocess.check_output(['bt', '--target', get_url(), 'index']).decode()
+    output_bytes = subprocess.check_output(['bt', '--target', get_url(), 'search', text])
         
     if not output_bytes:
         return []
@@ -53,7 +61,7 @@ def seach_tab(manager, text):
     return tabs
 
 def active_tab():
-    output = subprocess.check_output(['bt', '--target', '127.0.0.1:4625', 'active']).decode()
+    output = subprocess.check_output(['bt', '--target', get_url(), 'active']).decode()
     lines = output.strip().split('\n')
     lines = [line for line in lines if len(line)]
     if len(lines) == 0:

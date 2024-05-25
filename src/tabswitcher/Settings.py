@@ -16,7 +16,8 @@ class Settings:
     def create_default_settings(self):
         self.config['General'] = {
             'DarkMode': 'False',
-            'ShowBackground': 'True'
+            'ShowBackground': 'True',
+            'UseFirefox': 'True',
         }
         self.config['Functions'] = {
             'UseFzf': 'False',
@@ -36,6 +37,9 @@ class Settings:
 
     def get_show_background(self):
         return self.config.getboolean('General', 'ShowBackground')
+
+    def get_use_firefox(self):
+        return self.config.getboolean('General', 'UseFirefox')
 
     def get_use_fzf(self):
         return self.config.getboolean('Functions', 'UseFzf')

@@ -9,8 +9,6 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtNetwork import QNetworkAccessManager
 import subprocess
 
-import pyautogui
-
 from .SearchInput import SearchInput
 from .Settings import Settings
 from .TabList import TabList
@@ -23,20 +21,6 @@ settings = Settings()
 
 config_dir = os.path.expanduser('~/.tabswitcher')
 tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
-
-class Worker(QThread):
-    def __init__(self, window):
-        super().__init__()
-        self.window = window
-    finished = pyqtSignal()
-
-    def run(self):
-        while(True):
-            if not self.window.isActiveWindow() or not self.window.isVisible():
-                time.sleep(0.1) 
-            else:
-                break
-        self.finished.emit()
 
 class MainWindow(QWidget):
 
@@ -60,23 +44,8 @@ class MainWindow(QWidget):
             tab_id = self.recent_tabs[i-1]
             switch_tab(tab_id)
 
-
-    def bring_to_foreground(self):
-        win_x, win_y, _, _ = self.geometry().getRect()
-        mouse_x, mouse_y = pyautogui.position()
-        pyautogui.moveTo(win_x + 100, win_y + 20)
-        pyautogui.click()
-        pyautogui.moveTo(mouse_x, mouse_y)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Create a worker thread
-        self.worker = Worker(self)
-        # Connect the worker's finished signal to a slot
-        self.worker.finished.connect(self.bring_to_foreground)
-        # Start the worker thread
-        self.worker.start()
 
         # Open on monitor with mouse
         screen_number = QApplication.desktop().screenNumber(QCursor.pos())
