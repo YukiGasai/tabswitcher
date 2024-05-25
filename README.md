@@ -17,14 +17,14 @@ A simple window for switching between tabs in a browser. Using the `brotab` exte
 pip install tabswitcher
 ```
 
-1. Install the mediator in the browser
+2. Install the mediator in the browser
 
 ```bash
-bt install
+tabswitcher --install
 ```
 
-1. Restart the browser
+3. Restart the browser
 
 ## Problems
 
-- Tested only on windows
+- Works only on windows I think
