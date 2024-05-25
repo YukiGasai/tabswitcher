@@ -25,7 +25,7 @@ if '%errorlevel%' NEQ '0' (
 
 :: Create a scheduled task to run the BroTab Service
 echo Creating scheduled task for BroTab Service
-set "XML_PATH=%SCRIPT_DIR%/tasks/brotab_service.xml"
+set "XML_PATH=%SCRIPT_DIR%/brotab_service.xml"
 schtasks /Create /XML "%XML_PATH%" /TN "BroTab Service"
 
 :: Start the BroTab Service task
@@ -34,7 +34,7 @@ schtasks /Run /TN "BroTab Service"
 
 :: Create a scheduled task to run the Tabswitcher Logger
 echo Creating scheduled task for BroTab Service
-set "XML_PATH=%SCRIPT_DIR%/tasks/tabswitcher_service.xml"
+set "XML_PATH=%SCRIPT_DIR%/tabswitcher_service.xml"
 schtasks /Create /XML "%XML_PATH%" /TN "Tabswitcher Logger"
 
 :: Start the Tabswitcher Logger task

@@ -247,14 +247,13 @@ class MainWindow(QWidget):
 
 
 
-def main():
+def open_tabswitcher():
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-
     sys.exit(app.exec_())
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--startlogger":
         from .logTabs import start_logging
         start_logging()
@@ -262,5 +261,8 @@ if __name__ == "__main__":
         batch_script = os.path.join(script_dir, "assets", "install.bat")
         subprocess.run(["cmd", "/c", batch_script])
     else:
-        main()
+        open_tabswitcher()
+
+if __name__ == "__main__":
+    main()
 
