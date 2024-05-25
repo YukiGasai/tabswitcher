@@ -8,12 +8,20 @@ from .Tab import Tab
 settings = Settings()
 
 def get_url():
-    if settings.get_use_firefox():
-        return '127.0.0.1:4625'
-    return '127.0.0.1:4626'
+    mediator_port = settings.get_mediator_port()
+    if mediator_port == 0:
+        return None
+    elif mediator_port not in range(4625, 4627):
+        raise ValueError("Mediator port must be between 4625 and 4626 or 0 for automatic selection.")
+    return f'127.0.0.1:{mediator_port}'
 
 def get_tabs(manager):
-    output = subprocess.check_output(['bt', '--target', get_url(), 'list']).decode()
+    url = get_url()
+    if url is None:
+        output = subprocess.check_output(['bt', 'list']).decode()
+    else:
+        output = subprocess.check_output(['bt', '--target', url, 'list']).decode()
+
     lines = output.strip().split('\n')
     lines = [line for line in lines if len(line)]
     
@@ -34,16 +42,30 @@ def get_tabs(manager):
     return tabs
 
 def switch_tab(tab_id):
-    subprocess.call(['bt', '--target', get_url(), 'activate', tab_id])
+    url = get_url()
+    if url is None:
+        subprocess.call(['bt', 'activate', tab_id])
+    else:
+        subprocess.call(['bt', '--target', url, 'activate', tab_id])
 
 def delete_tab(tab_id):
-    subprocess.call(['bt', '--target', get_url(), 'close', tab_id])
+    url = get_url()
+    if url is None:
+        subprocess.call(['bt', 'close', tab_id])
+    else:
+        subprocess.call(['bt', '--target', url, 'close', tab_id])
 
 
 def seach_tab(manager, text):
-    _ = subprocess.check_output(['bt', '--target', get_url(), 'index']).decode()
-    output_bytes = subprocess.check_output(['bt', '--target', get_url(), 'search', text])
-        
+
+    url = get_url()
+    if url is None:
+        _ = subprocess.check_output(['bt', 'index']).decode()
+        output_bytes = subprocess.check_output(['bt', 'search', text])
+    else:
+        _ = subprocess.check_output(['bt', '--target', url, 'index']).decode()
+        output_bytes = subprocess.check_output(['bt', '--target', url, 'search', text])
+ 
     if not output_bytes:
         return []
     
@@ -61,7 +83,12 @@ def seach_tab(manager, text):
     return tabs
 
 def active_tab():
-    output = subprocess.check_output(['bt', '--target', get_url(), 'active']).decode()
+    url = get_url()
+    if url is None:
+        output = subprocess.check_output(['bt', 'active']).decode()
+    else:
+        output = subprocess.check_output(['bt', '--target', url, 'active']).decode()
+    
     lines = output.strip().split('\n')
     lines = [line for line in lines if len(line)]
     if len(lines) == 0:

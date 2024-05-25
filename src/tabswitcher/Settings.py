@@ -17,7 +17,7 @@ class Settings:
         self.config['General'] = {
             'DarkMode': 'False',
             'ShowBackground': 'True',
-            'UseFirefox': 'True',
+            'MediatorPort': 4625,
         }
         self.config['Functions'] = {
             'UseFzf': 'False',
@@ -38,8 +38,8 @@ class Settings:
     def get_show_background(self):
         return self.config.getboolean('General', 'ShowBackground')
 
-    def get_use_firefox(self):
-        return self.config.getboolean('General', 'UseFirefox')
+    def get_mediator_port(self):
+        return self.config.getint('General', 'MediatorPort')
 
     def get_use_fzf(self):
         return self.config.getboolean('Functions', 'UseFzf')
