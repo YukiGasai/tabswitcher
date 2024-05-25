@@ -56,7 +56,8 @@ def active_tab():
     output = subprocess.check_output(['bt', '--target', '127.0.0.1:4625', 'active']).decode()
     lines = output.strip().split('\n')
     lines = [line for line in lines if len(line)]
-    
+    if len(lines) == 0:
+        return None
     data = lines[0].split('\t')
     if (len(data) == 5):
         return data[0]

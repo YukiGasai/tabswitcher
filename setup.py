@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tabswitcher',
-    version='0.0.2',
+    version='0.0.3',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
@@ -14,7 +14,7 @@ setup(
     url='https://github.com/YukiGasai/tabswitcher',
     entry_points={
         'console_scripts': [
-            'tabswitcher=tabswitcher.__init__:main',
+            'tabswitcher=tabswitcher.__main__:main',
         ],
     },
     license='AGPL-3.0',
@@ -29,15 +29,17 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Operating System :: Microsoft :: Windows'
     ],
     keywords='tabswitcher, browsertool, tool',
     install_requires=[
         'chardet<4',
         'werkzeug<3.0',
-        'psutil==5.8.0',
+        'psutil==5.9.0',
         'fuzzywuzzy',
         'PyQt5',
         'schedule',
         'brotab',
+        'pyautogui'
     ],
 )

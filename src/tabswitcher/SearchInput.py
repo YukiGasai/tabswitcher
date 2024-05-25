@@ -35,7 +35,7 @@ class SearchInput(QLineEdit):
         # Set the font
         font = QFont(font_family, 10)
         self.setFont(font)
-
+        self.setFocus()
         self.setPlaceholderText("Search for a tab")
         self.setStyleSheet("""
     QLineEdit {

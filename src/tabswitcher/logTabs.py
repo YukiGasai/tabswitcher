@@ -1,8 +1,6 @@
 import os
-import subprocess
 import schedule
 import time
-import threading
 from collections import deque
 import pickle
 
@@ -26,11 +24,6 @@ def show_list():
     for tab in tabHistory:
         print(tab)
     
-
-# Start the mediator in a backgound thread it will run in the background forever to enusre the connection is always open
-def bt_moderator():
-    subprocess.run(["bt_mediator.exe"])
-
 # Check the active tab every second and log it to the tabHistory
 def check_active_tab():
     tab_id = active_tab()
@@ -40,7 +33,7 @@ def check_active_tab():
 
     with open(tab_history_path, 'wb') as f:
         pickle.dump(list(tabHistory), f)
-    # show_list()
+    show_list()
     
 # Start the scheculer just to make sure nothing is skipped
 def run_schedule():
@@ -48,16 +41,14 @@ def run_schedule():
         schedule.run_pending()
         time.sleep(1)
 
-if __name__ == "__main__":
+def start_logging():
 
     # Clear the history file
     if os.path.exists(tab_history_path):
         os.remove(tab_history_path)
 
+    # define when to check the active tab and how often
     schedule.every(settings.get_tab_logging_interval()).seconds.do(check_active_tab)
-
-    # Start the bt_moderator in another thread
-    threading.Thread(target=bt_moderator).start()
 
     # Start the schedule in the main thread
     if settings.get_enable_tab_logging():

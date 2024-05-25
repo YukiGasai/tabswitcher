@@ -2,12 +2,14 @@ import os
 import pickle
 
 import sys
+import time
 from PyQt5.QtGui import QFont, QCursor, QKeySequence, QDesktopServices, QIcon
-from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtNetwork import QNetworkAccessManager
-import psutil
 import subprocess
+
+import pyautogui
 
 from .SearchInput import SearchInput
 from .Settings import Settings
@@ -22,7 +24,31 @@ settings = Settings()
 config_dir = os.path.expanduser('~/.tabswitcher')
 tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
 
+class Worker(QThread):
+    def __init__(self, window):
+        super().__init__()
+        self.window = window
+    finished = pyqtSignal()
+
+    def run(self):
+        while(True):
+            if not self.window.isActiveWindow() or not self.window.isVisible():
+                time.sleep(0.1) 
+            else:
+                break
+        self.finished.emit()
+
 class MainWindow(QWidget):
+
+    @property
+    def tabs(self):
+        if not hasattr(self, '_tabs'):
+            self._tabs = get_tabs(self.manager)
+        return self._tabs
+    
+    @tabs.setter
+    def tabs(self, value):
+        self._tabs = value
 
     def checkFocus(self, old, new):
         # If the new focus widget is not this widget or a child of this widget
@@ -34,32 +60,43 @@ class MainWindow(QWidget):
             tab_id = self.recent_tabs[i-1]
             switch_tab(tab_id)
 
+
+    def bring_to_foreground(self):
+        win_x, win_y, _, _ = self.geometry().getRect()
+        mouse_x, mouse_y = pyautogui.position()
+        pyautogui.moveTo(win_x + 100, win_y + 20)
+        pyautogui.click()
+        pyautogui.moveTo(mouse_x, mouse_y)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Create a worker thread
+        self.worker = Worker(self)
+        # Connect the worker's finished signal to a slot
+        self.worker.finished.connect(self.bring_to_foreground)
+        # Start the worker thread
+        self.worker.start()
 
         # Open on monitor with mouse
         screen_number = QApplication.desktop().screenNumber(QCursor.pos())
         screen_geometry = QApplication.desktop().screenGeometry(screen_number)
         self.move(screen_geometry.center() - self.rect().center())
-
+        self.setWindowModality(Qt.ApplicationModal)
         self.recent_tabs = self.get_last_active_tabs()
 
         # Open settings with Ctrl+,
         shortcut = QShortcut(QKeySequence("Ctrl+,"), self)
         shortcut.activated.connect(self.open_settings)
 
-        # Kill the mediator and tablogger service
-        shortcut = QShortcut(QKeySequence("Ctrl+q"), self)
-        shortcut.activated.connect(self.killTabLogger)
-
         for i in range(1, 6):
             shortcut = QShortcut(QKeySequence("Ctrl+" + str(i)), self)
             shortcut.activated.connect(lambda i=i: self.open_recent_tab(i))
-
+      
         self.setWindowTitle('TabSwitcher')
         icon_path = os.path.join(script_dir, 'assets', "Icon.ico")
         self.setWindowIcon(QIcon(icon_path))
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint )
         self.settings = Settings()
         if self.settings.get_show_background() == False:
             self.setAttribute(Qt.WA_TranslucentBackground)
@@ -77,7 +114,6 @@ class MainWindow(QWidget):
         self.setFont(font)
         # Create a QLineEdit
         self.input = SearchInput()
-
         self.list = TabList(self)
 
         self.layout.addWidget(self.input)
@@ -86,7 +122,6 @@ class MainWindow(QWidget):
         self.input.textChanged.connect(self.update_list)
         self.list.itemActivated.connect(self.activate_tab)
         self.update_list("")
-        self.input.setFocus()
         self.setStyleSheet("""
         QWidget {
             background: %s;
@@ -97,15 +132,6 @@ class MainWindow(QWidget):
     def open_settings(self):
         # Open the configuration file in the default text editor
         QDesktopServices.openUrl(QUrl.fromLocalFile(self.settings.config_file))
-
-    def killTabLogger(self):
-        proc = get_process("logTabs.py")
-        if proc is not None:
-            proc.kill()
-        proc = get_process("bt_mediator.exe")
-        if proc is not None:
-            proc.kill()
-        self.close()
 
     def checkFocus(self, old, new):
         # If the new focus widget is not this widget or a child of this widget
@@ -124,12 +150,10 @@ class MainWindow(QWidget):
         url = f'https://www.google.com/search?q={text}&btnI=&sourceid=navclient&gfns=1'
         QDesktopServices.openUrl(QUrl(url))
 
-
     def filterByPageContent(self, text):
         tabs = seach_tab(self.manager, text[1:].strip())
         for tab in tabs:
             self.list.addItem(tab.item)
-
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
@@ -168,7 +192,6 @@ class MainWindow(QWidget):
 
         else:
             super().keyPressEvent(event)
-    
     
 
     def get_last_active_tabs(self):
@@ -224,26 +247,20 @@ class MainWindow(QWidget):
 
 
 
-def get_process(process_name):
-    for proc in psutil.process_iter(['cmdline']):
-        if proc.info['cmdline'] is None:  # Skip processes with no command line arguments
-            continue
-        if any(process_name in arg for arg in proc.info['cmdline']):
-            return proc
-    return None
-
-
 def main():
-
-    if not get_process("logTabs.py"):
-        logtabs_path = os.path.join(script_dir, 'logTabs.py')
-        subprocess.Popen(['python', logtabs_path])
-
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
+
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "--startlogger":
+        from .logTabs import start_logging
+        start_logging()
+    elif len(sys.argv) > 1 and sys.argv[1] == "--install":
+        batch_script = os.path.join(script_dir, "assets", "install.bat")
+        subprocess.run(["cmd", "/c", batch_script])
+    else:
+        main()
 
