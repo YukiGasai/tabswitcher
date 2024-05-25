@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtNetwork import QNetworkAccessManager
 import subprocess
 
+import pkg_resources
+
 from .SearchInput import SearchInput
 from .Settings import Settings
 from .TabList import TabList
@@ -22,6 +24,10 @@ settings = Settings()
 
 config_dir = os.path.expanduser('~/.tabswitcher')
 tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
+
+def open_settings():
+    # Open the configuration file in the default text editor
+    QDesktopServices.openUrl(QUrl.fromLocalFile(settings.config_file))
 
 class MainWindow(QWidget):
 
@@ -57,7 +63,7 @@ class MainWindow(QWidget):
 
         # Open settings with Ctrl+,
         shortcut = QShortcut(QKeySequence("Ctrl+,"), self)
-        shortcut.activated.connect(self.open_settings)
+        shortcut.activated.connect(open_settings)
 
         for i in range(1, 6):
             shortcut = QShortcut(QKeySequence("Ctrl+" + str(i)), self)
@@ -98,10 +104,6 @@ class MainWindow(QWidget):
         }
     """ % (getWindowBackgroundColor())
         )
-    
-    def open_settings(self):
-        # Open the configuration file in the default text editor
-        QDesktopServices.openUrl(QUrl.fromLocalFile(self.settings.config_file))
 
     def checkFocus(self, old, new):
         # If the new focus widget is not this widget or a child of this widget
@@ -230,6 +232,17 @@ def main():
     elif len(sys.argv) > 1 and sys.argv[1] == "--install":
         batch_script = os.path.join(script_dir, "assets", "install.bat")
         subprocess.run(["cmd", "/c", batch_script])
+    elif len(sys.argv) > 1 and sys.argv[1] == "--version":
+        version = pkg_resources.get_distribution("tabswitcher").version
+        print(f"Version: {version}")
+    elif len(sys.argv) > 1 and sys.argv[1] == "--settings":
+        open_settings()
+    elif len(sys.argv) > 1 and sys.argv[1] == "--help":
+        print("tabswitcher: No arguments will just open the switcher window")
+        print("--startlogger\tRun the tab logger that will save the currenlty active tab")
+        print("--install\tWill make sure the logger is startet on system start")
+        print("--version\tGet the version number")
+        print("--help\t\tSee this page")
     else:
         open_tabswitcher()
 
