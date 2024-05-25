@@ -34,8 +34,8 @@ setup(
     keywords='tabswitcher, browsertool, tool',
     install_requires=[
         'chardet<4',
-        'werkzeug<3.0',
-        'psutil==5.9.0',
+        'werkzeug<3.0', # werkzeug 3.0 breaks flask and by extension brotab
+        'psutil==5.9.4', # psutil is the first version that supports the wheels for multiple python versions
         'fuzzywuzzy',
         'PyQt5',
         'schedule',
