@@ -19,7 +19,7 @@ def show_list():
     global counter
     counter += 1
     #Clear screen
-    print("\033[H\033[J")
+    os.system('cls' if os.name == 'nt' else 'clear')
     print(f"Run {counter}")
     for tab in tabHistory:
         print(tab)
@@ -33,7 +33,7 @@ def check_active_tab():
 
     with open(tab_history_path, 'wb') as f:
         pickle.dump(list(tabHistory), f)
-    show_list()
+    # show_list()
     
 # Start the scheculer just to make sure nothing is skipped
 def run_schedule():

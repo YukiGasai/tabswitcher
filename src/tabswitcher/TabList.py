@@ -1,6 +1,8 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidget
 
+from tabswitcher.actions import activate_tab
+
 from .colors import getBackgroundColor, getSelectedColor, getTextColor
 
 
@@ -11,7 +13,7 @@ class TabList(QListWidget):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         # Connect the itemClicked signal to the parent's activate_tab method
-        self.itemClicked.connect(parent.activate_tab)
+        self.itemClicked.connect(lambda item: activate_tab(parent, item))
         self.setStyleSheet("""
     QListWidget {
         border: none;

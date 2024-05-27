@@ -1,11 +1,18 @@
 
+import os
 import subprocess
 import chardet
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QGuiApplication
+
+from tabswitcher.focusWindow import focus_window
 
 from .Settings import Settings
 from .Tab import Tab
 
 settings = Settings()
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
 def get_url():
     mediator_port = settings.get_mediator_port()
@@ -44,12 +51,26 @@ def get_tabs(manager):
     except:
         return {}
 
-def switch_tab(tab_id):
+def switch_tab(tab_id, tab_title=None):
     url = get_url()
-    if url is None:
-        subprocess.call(['bt', 'activate', tab_id])
+
+    app = QGuiApplication.instance()
+    modifiers = app.queryKeyboardModifiers()
+
+    if modifiers & Qt.ShiftModifier:
+        if url is None:
+            subprocess.call(['bt', 'activate', tab_id, '--focused'])
+        else:
+            subprocess.call(['bt', '--target', url, 'activate', tab_id, '--focused'])
+        if tab_title is not None:
+            focus_window(tab_title)
+
     else:
-        subprocess.call(['bt', '--target', url, 'activate', tab_id])
+        if url is None:
+            subprocess.call(['bt', 'activate', tab_id])
+        else:
+            subprocess.call(['bt', '--target', url, 'activate', tab_id])
+
 
 def delete_tab(tab_id):
     url = get_url()

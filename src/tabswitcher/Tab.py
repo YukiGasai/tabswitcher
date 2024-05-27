@@ -16,9 +16,12 @@ class Tab:
         self.url = url
         self.icon = f"https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url={get_domain(url)}&size=64"
         self.item = QListWidgetItem(self.title)
-        self.networkImage = NetworkImage(manager)
-        self.networkImage.download(self.icon, self.item)
-        self.item.setData(Qt.UserRole, self.id)
+        self.item.setData(Qt.UserRole, (self.id, self.title, self.url))
+        try:
+            self.networkImage = NetworkImage(manager)
+            self.networkImage.download(self.icon, self.item)
+        except Exception as e:
+            print(f"Error creating bookmark: {self.icon}, error: {e}")
 
     def __str__(self):
         return f"{self.id} - {self.title} - {self.url}"
