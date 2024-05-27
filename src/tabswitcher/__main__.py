@@ -1,6 +1,7 @@
 import os
 import pickle
 
+import platform
 import sys
 from PyQt5.QtGui import QFont, QCursor, QDesktopServices, QIcon
 from PyQt5.QtCore import Qt, QUrl
@@ -336,8 +337,15 @@ def main():
         else:
             print_recent_tabs()
     elif len(sys.argv) > 1 and sys.argv[1] == "--install":
-        batch_script = os.path.join(script_dir, "assets", "install.bat")
-        subprocess.run(["cmd", "/c", batch_script])
+        if platform.system() == "Windows":
+            batch_script = os.path.join(script_dir, "assets", "install.bat")
+            subprocess.run(["cmd", "/c", batch_script])
+
+        else:
+            batch_script = os.path.join(script_dir, "assets", "install.sh")
+            subprocess.run(["sh", batch_script])
+
+
     elif len(sys.argv) > 1 and sys.argv[1] == "--version":
         version = pkg_resources.get_distribution("tabswitcher").version
         print(f"Version: {version}")
