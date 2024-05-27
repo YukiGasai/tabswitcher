@@ -22,3 +22,8 @@ def getWindowBackgroundColor():
             return "#121212"
         return "#dddddd"
     return "transparent"
+
+def getPlaceholderColor():
+    if(settings.get_dark_mode()):
+        return "#8a8a8b"
+    return "#8a8a8b"

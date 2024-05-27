@@ -4,7 +4,7 @@ import pickle
 import sys
 from PyQt5.QtGui import QFont, QCursor, QDesktopServices, QIcon
 from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
 from PyQt5.QtNetwork import QNetworkAccessManager
 import subprocess
 
@@ -20,7 +20,7 @@ from .SearchInput import SearchInput
 from .Settings import Settings
 from .TabList import TabList
 from .brotab import delete_tab, get_tabs, seach_tab
-from .colors import getWindowBackgroundColor
+from .colors import getBackgroundColor, getPlaceholderColor, getWindowBackgroundColor
 from .fuzzySearch import fuzzy_search_cmd, fuzzy_search_py
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -67,6 +67,9 @@ class MainWindow(QWidget):
         if new is not self and not self.isAncestorOf(new):
             self.close()
 
+    def update_list_label(self):
+        self.listCountLabel.setText(f"{self.list.count()} tabs")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -103,18 +106,31 @@ class MainWindow(QWidget):
         font = QFont(font_path, 10)  # adjust the size as needed
         self.setFont(font)
         # Create a QLineEdit
-        self.input = SearchInput()
         self.list = TabList(self)
+        self.input = SearchInput(self)
+        self.input.setFocus()
         self.layout.addWidget(self.input)
+
         self.layout.addWidget(self.list)
         self.setLayout(self.layout)
         self.input.textChanged.connect(self.update_list)
         self.list.itemActivated.connect(lambda item: activate_tab(self, item))
-        self.update_list("")
-        self.input.setFocus()
-        
-        setup_shortcuts(self)
 
+        self.info_label = QLabel(self)
+        self.info_label.setAlignment(Qt.AlignCenter)
+        self.info_label.setStyleSheet("""
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 32px;
+            background: %s;
+            color: %s;
+    """ % (getBackgroundColor() ,getPlaceholderColor())
+        )
+        self.layout.addWidget(self.info_label)
+    
+        self.update_list("")
+    
+        setup_shortcuts(self)
 
         self.setStyleSheet("""
         QWidget {
@@ -130,6 +146,13 @@ class MainWindow(QWidget):
 
     def filterByPageContent(self, text):
         tabs = seach_tab(self.manager, text[1:].strip())
+        if len(tabs):
+            self.list.show()
+            self.info_label.hide()
+        else:
+            self.info_label.setText("No tabs with this text found.")
+            self.list.hide()
+            self.info_label.show()
         for tab in tabs:
             self.list.addItem(tab.item)
 
@@ -201,7 +224,7 @@ class MainWindow(QWidget):
                 return tabs
             
         except FileNotFoundError:
-            return []
+            return {}
 
     def get_last_active_tab(self, index):
         tabs = self.get_last_active_tabs()
@@ -251,6 +274,49 @@ class MainWindow(QWidget):
 
         for tab in tabs_to_display:
             self.list.addItem(tab.item)
+        self.input.update_count()
+
+        if self.list.count() > 0:
+            self.info_label.setText("")
+            self.list.show()
+            self.info_label.hide()
+
+            return
+
+        input_text = self.input.text()
+        if input_text == "" and settings.get_enable_tab_logging():
+            self.info_label.setText("No recent tabs found.")
+        elif input_text == "":
+            self.info_label.setText("No open tabs found.")
+        elif input_text.startswith("#"):
+            self.info_label.setText("No bookmarks found.")
+        else:
+            self.info_label.setText("No matches found.")
+
+        self.info_label.show()
+        self.list.hide()
+        
+
+
+def print_recent_tabs(index):
+    try:
+        with open(tab_history_path, 'rb') as f:
+            tab_ids = pickle.load(f)
+            if index:
+                print(tab_ids[int(index)])
+                exit(0)
+            for tab_id in tab_ids:
+                print(tab_id)
+            exit(0)
+            
+    except FileNotFoundError:
+        print("File not found: " + tab_history_path, file=sys.stderr)
+        exit(1)
+    except ValueError:
+        print("Invalid index: " + index, file=sys.stderr)
+        exit(1)
+    
+
 
 def open_tabswitcher():
     app = QApplication(sys.argv)
@@ -264,6 +330,11 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--startlogger":
         from .logTabs import start_logging
         start_logging()
+    elif len(sys.argv) > 1 and sys.argv[1] == "--latest":
+        if len(sys.argv) > 2:
+            print_recent_tabs(sys.argv[2])
+        else:
+            print_recent_tabs()
     elif len(sys.argv) > 1 and sys.argv[1] == "--install":
         batch_script = os.path.join(script_dir, "assets", "install.bat")
         subprocess.run(["cmd", "/c", batch_script])
@@ -276,6 +347,7 @@ def main():
         print("tabswitcher: No arguments will just open the switcher window")
         print("--startlogger\tRun the tab logger that will save the currenlty active tab")
         print("--install\tWill make sure the logger is startet on system start")
+        print("--latest\tWill return of the tab id of the last 10 active tabs you can also add a index as secons parameter")
         print("--version\tGet the version number")
         print("--help\t\tSee this page")
     else:

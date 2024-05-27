@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtGui import QIcon, QFont, QFontDatabase
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QWidget, QLineEdit, QHBoxLayout, QToolButton
+from PyQt5.QtWidgets import QLineEdit, QHBoxLayout, QToolButton, QLabel
 
 from .Settings import Settings
 from .colors import getBackgroundColor, getTextColor
@@ -9,8 +9,18 @@ from .colors import getBackgroundColor, getTextColor
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
 class SearchInput(QLineEdit):
+
+    def update_count(self):
+        self.listCountLabel.setText(str(self.parent().list.count()))
+
     def __init__(self, parent=None):
         super(SearchInput, self).__init__(parent)
+
+        font_path = os.path.join(script_dir, 'assets', "sans.ttf")
+        font_id = QFontDatabase.addApplicationFont(font_path)
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        # Set the font
+        font = QFont(font_family, 10)
 
         # Create a QToolButton
         button = QToolButton()
@@ -19,21 +29,26 @@ class SearchInput(QLineEdit):
         button.setIconSize(QSize(32, 32))
         button.setEnabled(False)
         button.setStyleSheet("QToolButton { border: none; padding: 0px; background: transparent; }")
+        self.listCountLabel = QLabel()
+        self.setFont(font)
+        self.listCountLabel.setStyleSheet("""
+    QLabel {
+        color: %s;
+        font-size: 12px;
+        background: transparent;
+        padding-left: 5px;
+        margin: 0px;
+        font: sans;
+    }
+""" % (getTextColor())
+        )
 
         # Create a QHBoxLayout
         layout = QHBoxLayout(self)
         layout.addWidget(button, 0, Qt.AlignLeft)
+        layout.addWidget(self.listCountLabel, 0, (Qt.AlignRight | Qt.AlignBottom))
 
-        widget = QWidget()
-        layout.addWidget(widget)
-        widget.setStyleSheet("background:transparent;")
-        self.setLayout(layout)
         self.settings = Settings()
-        font_path = os.path.join(script_dir, 'assets', "sans.ttf")
-        font_id = QFontDatabase.addApplicationFont(font_path)
-        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-        # Set the font
-        font = QFont(font_family, 10)
         self.setFont(font)
         self.setFocus()
         self.setPlaceholderText("Search for a tab")
@@ -43,6 +58,7 @@ class SearchInput(QLineEdit):
         border-radius: 10px;
         padding: 0 8px;
         padding-left: 60px; 
+        padding-right: 60px; 
         height: 50px;
         background: %s;
         color: %s;

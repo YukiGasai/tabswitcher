@@ -1,6 +1,8 @@
 
 import os
 import webbrowser
+import platform
+import subprocess
 
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
@@ -11,9 +13,12 @@ from tabswitcher.brotab import switch_tab
 settings = Settings()
 
 def open_settings():
-    # Open the configuration file in the default text editor
-    os.startfile(settings.config_file)
-
+    if platform.system() == "Windows":
+        os.startfile(settings._file)
+    elif platform.system() == "Darwin":
+        subprocess.call(["open", settings._file])
+    else:
+        subprocess.call(["xdg-open", settings._file])
 
 def activate_tab(window, item):
     tab_id, tab_title, tab_url = item.data(Qt.UserRole)

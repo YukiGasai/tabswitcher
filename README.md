@@ -26,6 +26,12 @@ tabswitcher --install
 
 3. Restart the browser
 
+When using Ubuntu some extra setup is required.
+
+```bash
+sudo apt-get install qtbase5-dev libxcb-xinerama0
+```
+
 ## Usage
 
 Upon opening TabSwitcher, your most recently active tabs will be displayed in the list.
@@ -52,4 +58,4 @@ Starting a input with `!` will attempt to open a new tab with the website page (
 
 ## Known Issues
 
-- Currently, TabSwitcher only supports Windows.
+- Currently, TabSwitcher only supports Windows and limited on Ubuntu.

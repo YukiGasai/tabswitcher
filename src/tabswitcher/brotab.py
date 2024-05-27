@@ -1,5 +1,6 @@
 
 import os
+import pickle
 import subprocess
 import chardet
 
@@ -13,6 +14,8 @@ from .Tab import Tab
 
 settings = Settings()
 script_dir = os.path.dirname(os.path.realpath(__file__))
+config_dir = os.path.expanduser('~/.tabswitcher')
+tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
 
 def get_url():
     mediator_port = settings.get_mediator_port()
@@ -126,3 +129,4 @@ def active_tab():
         return None
     except:
         return None
+    
