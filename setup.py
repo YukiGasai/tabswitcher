@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tabswitcher',
-    version='0.1.3',
+    version='0.1.4',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
@@ -38,5 +38,7 @@ setup(
         'PyQt5',
         'schedule',
         'brotab',
+        'pynput',
+        'pywin32;platform_system=="Windows"',
     ],
 )

@@ -66,6 +66,7 @@ def switch_tab(tab_id, tab_title=None):
         else:
             subprocess.call(['bt', '--target', url, 'activate', tab_id, '--focused'])
         if tab_title is not None:
+            print("FOCUS THIS " + tab_title)
             focus_window(tab_title)
 
     else:

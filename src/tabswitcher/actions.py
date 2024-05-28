@@ -14,11 +14,11 @@ settings = Settings()
 
 def open_settings():
     if platform.system() == "Windows":
-        os.startfile(settings._file)
+        os.startfile(settings.config_file)
     elif platform.system() == "Darwin":
-        subprocess.call(["open", settings._file])
+        subprocess.call(["open", settings.config_file])
     else:
-        subprocess.call(["xdg-open", settings._file])
+        subprocess.call(["xdg-open", settings.config_file])
 
 def activate_tab(window, item):
     tab_id, tab_title, tab_url = item.data(Qt.UserRole)
