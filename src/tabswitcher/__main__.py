@@ -2,9 +2,10 @@ import os
 import pickle
 
 import platform
+import shutil
 import sys
-from PyQt5.QtGui import QFont, QCursor, QDesktopServices, QIcon
-from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtGui import QFont, QCursor, QIcon
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
 from PyQt5.QtNetwork import QNetworkAccessManager
 import subprocess
@@ -317,9 +318,12 @@ def main():
             print_recent_tabs()
     elif len(sys.argv) > 1 and sys.argv[1] == "--install":
         if platform.system() == "Windows":
-            batch_script = os.path.join(script_dir, "assets", "install.bat")
-            subprocess.run(["cmd", "/c", batch_script])
-
+            subprocess.run(["bt", "install"], check=True)
+            startup_script = os.path.join(script_dir, "assets", "runLogger.vbs")
+            startup_folder = os.path.join(os.environ["APPDATA"], r"Microsoft\Windows\Start Menu\Programs\Startup")
+            vbs_path = os.path.join(startup_folder, "runLogger.vbs")
+            shutil.copy2(startup_script, vbs_path)
+            subprocess.Popen(["cscript", vbs_path])
         else:
             batch_script = os.path.join(script_dir, "assets", "install.sh")
             subprocess.run(["sh", batch_script])
