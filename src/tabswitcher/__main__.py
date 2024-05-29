@@ -20,7 +20,7 @@ from tabswitcher.shortcuts import setup_shortcuts
 from .SearchInput import SearchInput
 from .Settings import Settings
 from .TabList import TabList
-from .brotab import delete_tab, get_tabs, seach_tab
+from .brotab import delete_tab, get_tabs, print_recent_tabs, seach_tab
 from .colors import getBackgroundColor, getPlaceholderColor, getWindowBackgroundColor
 from .fuzzySearch import fuzzy_search_cmd, fuzzy_search_py
 
@@ -296,27 +296,6 @@ class MainWindow(QWidget):
 
         self.info_label.show()
         self.list.hide()
-        
-
-
-def print_recent_tabs(index):
-    try:
-        with open(tab_history_path, 'rb') as f:
-            tab_ids = pickle.load(f)
-            if index:
-                print(tab_ids[int(index)])
-                exit(0)
-            for tab_id in tab_ids:
-                print(tab_id)
-            exit(0)
-            
-    except FileNotFoundError:
-        print("File not found: " + tab_history_path, file=sys.stderr)
-        exit(1)
-    except ValueError:
-        print("Invalid index: " + index, file=sys.stderr)
-        exit(1)
-    
 
 
 def open_tabswitcher():

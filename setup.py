@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tabswitcher',
-    version='0.1.6',
+    version='0.1.7',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
@@ -40,5 +40,6 @@ setup(
         'brotab',
         'pynput;platform_system=="Windows"',
         'pywin32;platform_system=="Windows"',
+        'keyboard;platform_system=="Windows"'
     ],
 )

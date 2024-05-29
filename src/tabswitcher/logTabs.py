@@ -1,12 +1,13 @@
 import os
 import platform
+import subprocess
 import schedule
 import time
 from collections import deque
 import pickle
-
 from tabswitcher.Settings import Settings
-from tabswitcher.brotab import active_tab
+from tabswitcher.actions import activate_tab
+from tabswitcher.brotab import active_tab, get_recent_tabs, activate_tab
 
 settings = Settings()
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -42,8 +43,16 @@ def run_schedule():
         schedule.run_pending()
         time.sleep(1)
 
-def start_logging():
+def runTabSwitcher():
+    subprocess.Popen("tabswitcher")
 
+def focusLastTab():
+    last_tab = get_recent_tabs(1)
+    if last_tab is not None:
+        activate_tab(last_tab, False)
+    return
+
+def start_logging():
     # Clear the history file
     if os.path.exists(tab_history_path):
         os.remove(tab_history_path)
@@ -51,12 +60,14 @@ def start_logging():
     # define when to check the active tab and how often
     schedule.every(settings.get_tab_logging_interval()).seconds.do(check_active_tab)
 
-    if settings.get_use_hotkey():
-        if platform.system() == 'Windows':
-            hotkey_path = os.path.join(script_dir, 'assets', "hotkey.exe")
-            os.system(f'start {hotkey_path}')
-        else:
-            print("Hotkey is only available on Windows")
+    if platform.system() == "Windows" and settings.get_use_hotkey():
+        import keyboard
+        
+        hotkey = settings.get_hotkey_open()
+        keyboard.add_hotkey(hotkey, runTabSwitcher, suppress=True)
+
+        hotkey = settings.get_hotkey_last()
+        keyboard.add_hotkey(hotkey, focusLastTab, suppress=True)
 
     # Start the schedule in the main thread
     if settings.get_enable_tab_logging():

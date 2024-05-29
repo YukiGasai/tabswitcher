@@ -19,7 +19,9 @@ class Settings:
                 'TabLoggingMax': 10,
                 'TabLoggingFile': 'tabHistory.pkl',
                 'LoadBookmarks': True,
-                'UseHotKey': True,
+                'UseHotKeys': True,
+                'HotkeyOpen': 'esc+s',
+                'HotkeyLast': 'esc+a',
             }
         }
         config_dir = os.path.expanduser('~/.tabswitcher')
@@ -97,5 +99,18 @@ class Settings:
             return self.config.getboolean('Functions', 'UseHotKey')
         except:
             return self.defaults['Functions']['UseHotKey']
+    
+    def get_hotkey_open(self):
+        try:
+            return self.config.get('Functions', 'HotkeyOpen')
+        except:
+            return self.defaults['Functions']['HotkeyOpen']
+    
+    def get_hotkey_last(self):
+        try:
+            return self.config.get('Functions', 'HotkeyLast')
+        except:
+            return self.defaults['Functions']['HotkeyLast']
+    
     
     

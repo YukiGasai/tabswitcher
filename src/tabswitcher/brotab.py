@@ -2,6 +2,7 @@
 import os
 import pickle
 import subprocess
+import sys
 import chardet
 
 from PyQt5.QtCore import Qt
@@ -54,26 +55,34 @@ def get_tabs(manager):
     except:
         return {}
 
-def switch_tab(tab_id, tab_title=None):
+def activate_tab(tab_id, focus):
     url = get_url()
+
+    command = ['bt']
+
+    if url is not None:
+        command.append('--target')
+        command.append(url)
+
+    command.append('activate')
+    command.append(tab_id)
+
+    if focus:
+        command.append('--focused')
+
+    subprocess.call(command)
+
+def switch_tab(tab_id, tab_title=None):
+    
 
     app = QGuiApplication.instance()
     modifiers = app.queryKeyboardModifiers()
 
-    if modifiers & Qt.ShiftModifier:
-        if url is None:
-            subprocess.call(['bt', 'activate', tab_id, '--focused'])
-        else:
-            subprocess.call(['bt', '--target', url, 'activate', tab_id, '--focused'])
-        if tab_title is not None:
-            print("FOCUS THIS " + tab_title)
-            focus_window(tab_title)
-
+    if modifiers & Qt.ShiftModifier and tab_title is not None:
+        activate_tab(tab_id, True)
+        focus_window(tab_title)
     else:
-        if url is None:
-            subprocess.call(['bt', 'activate', tab_id])
-        else:
-            subprocess.call(['bt', '--target', url, 'activate', tab_id])
+        activate_tab(tab_id, False)
 
 
 def delete_tab(tab_id):
@@ -130,4 +139,39 @@ def active_tab():
         return None
     except:
         return None
+    
+def get_recent_tabs(index=None):
+    try:
+        with open(tab_history_path, 'rb') as f:
+            tab_ids = pickle.load(f)
+            if index:
+                index = int(index)
+                if index < len(tab_ids):
+                    return tab_ids[index]
+                else:
+                    return None
+            return tab_ids
+            
+    except FileNotFoundError:
+        print("File not found: " + tab_history_path, file=sys.stderr)
+        exit(1)
+    except ValueError:
+        print("Invalid index: " + index, file=sys.stderr)
+        exit(1)
+
+def print_recent_tabs(index=None):
+    try:
+        tabs = get_recent_tabs(index)
+        if isinstance(tabs, list):
+            for tab in tabs:
+                print(tab)
+        else:
+            print(tabs)
+            
+    except FileNotFoundError:
+        print("File not found: " + tab_history_path, file=sys.stderr)
+        exit(1)
+    except ValueError:
+        print("Invalid index: " + index, file=sys.stderr)
+        exit(1)  
     
