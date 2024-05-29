@@ -25,6 +25,7 @@ class Settings:
             'TabLoggingInterval': '1',
             'TabLoggingMax': '10',
             'TabLoggingFile': 'tabHistory.pkl',
+            'LoadBookmarks': True
         }
         with open(self.config_file, 'w') as configfile:
             self.config.write(configfile)
@@ -55,4 +56,8 @@ class Settings:
     
     def get_tab_logging_file(self):
         return self.config.get('Functions', 'TabLoggingFile')
+    
+    def get_load_bookmarks(self):
+        return self.config.getboolean('Functions', 'LoadBookmarks')
+    
     

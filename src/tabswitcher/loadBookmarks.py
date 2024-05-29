@@ -2,6 +2,10 @@ import sqlite3
 import json
 import os
 
+from tabswitcher.Settings import Settings
+
+settings = Settings()
+
 def load_chrome_bookmarks():
 
     # Path to the Chrome bookmarks file
@@ -11,22 +15,28 @@ def load_chrome_bookmarks():
         return []
 
     # Load the bookmarks file
-    with open(bookmarks_file, 'r') as f:
+    with open(bookmarks_file, 'r', encoding='utf-8') as f:
         bookmarks_data = json.load(f)
 
     # Initialize an empty list to store the bookmarks
     bookmarks = []
-
     # Recursive function to extract bookmarks from the nested structure
     def extract_bookmarks(node):
-        if 'children' in node:
-            for child in node['children']:
-                extract_bookmarks(child)
-        elif node['type'] == 'url':
-            bookmarks.append((node['name'], node['url']))
+        for child in node:
+            if not isinstance(child, dict):
+                continue
+            if 'type' in child:
+                if child['type'] == 'folder':
+                    for subChild in child['children']:
+                        extract_bookmarks(subChild)
+                elif child['type'] == 'url':
+                    bookmarks.append((child.get('name', ''), child.get('url', '')))
 
     # Extract bookmarks from the root node
-    extract_bookmarks(bookmarks_data['roots'])
+    if 'roots' in bookmarks_data:
+        for subnode in bookmarks_data['roots'].values():
+            if 'children' in subnode:
+                extract_bookmarks(subnode['children'])
 
     return bookmarks
 
@@ -79,6 +89,10 @@ def load_firefox_bookmark():
     return bookmarks
 
 def load_bookmarks():
+
+    if not settings.get_load_bookmarks():
+        return []
+    
     chrome_bookmarks = load_chrome_bookmarks()
     firefox_bookmarks = load_firefox_bookmark()
     return chrome_bookmarks + firefox_bookmarks
