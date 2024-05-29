@@ -5,6 +5,23 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 
 class Settings:
     def __init__(self):
+        # Define default values
+        self.defaults = {
+            'General': {
+                'DarkMode': False,
+                'ShowBackground': False,
+                'MediatorPort': 4625,
+            },
+            'Functions': {
+                'UseFzf': False,
+                'EnableTabLogging': True,
+                'TabLoggingInterval': 1,
+                'TabLoggingMax': 10,
+                'TabLoggingFile': 'tabHistory.pkl',
+                'LoadBookmarks': True,
+                'UseHotKey': True,
+            }
+        }
         config_dir = os.path.expanduser('~/.tabswitcher')
         os.makedirs(config_dir, exist_ok=True)
         self.config_file = os.path.join(config_dir, 'settings.ini')
@@ -14,50 +31,71 @@ class Settings:
         self.load_settings()
 
     def create_default_settings(self):
-        self.config['General'] = {
-            'DarkMode': 'False',
-            'ShowBackground': 'True',
-            'MediatorPort': 4625,
-        }
-        self.config['Functions'] = {
-            'UseFzf': 'False',
-            'EnableTabLogging': 'True',
-            'TabLoggingInterval': '1',
-            'TabLoggingMax': '10',
-            'TabLoggingFile': 'tabHistory.pkl',
-            'LoadBookmarks': True
-        }
         with open(self.config_file, 'w') as configfile:
+            self.config.read_dict(self.defaults)
             self.config.write(configfile)
 
     def load_settings(self):
         self.config.read(self.config_file)
 
     def get_dark_mode(self):
-        return self.config.getboolean('General', 'DarkMode')
+        try:
+            return self.config.getboolean('General', 'DarkMode')
+        except:
+            return self.defaults['General']['DarkMode']
 
     def get_show_background(self):
-        return self.config.getboolean('General', 'ShowBackground')
+        try:
+            return self.config.getboolean('General', 'ShowBackground')
+        except:
+            return self.defaults['General']['ShowBackground']
 
     def get_mediator_port(self):
-        return self.config.getint('General', 'MediatorPort')
-
+        try:
+            return self.config.getint('General', 'MediatorPort')
+        except:
+            return self.defaults['General']['MediatorPort']
+        
     def get_use_fzf(self):
-        return self.config.getboolean('Functions', 'UseFzf')
-
+        try:
+            return self.config.getboolean('Functions', 'UseFzf')
+        except:
+            return self.defaults['Functions']['UseFzf']
+        
     def get_enable_tab_logging(self):
-        return self.config.getboolean('Functions', 'EnableTabLogging')
-    
+        try:
+            return self.config.getboolean('Functions', 'EnableTabLogging')
+        except:
+            return self.defaults['Functions']['EnableTabLogging']
+        
     def get_tab_logging_interval(self):
-        return self.config.getint('Functions', 'TabLoggingInterval')
+        try:
+            return self.config.getint('Functions', 'TabLoggingInterval')
+        except:
+            return self.defaults['Functions']['TabLoggingInterval']
     
     def get_tab_logging_max(self):
-        return self.config.getint('Functions', 'TabLoggingMax')
+        try:
+            return self.config.getint('Functions', 'TabLoggingMax')
+        except:
+            return self.defaults['Functions']['TabLoggingMax']
     
     def get_tab_logging_file(self):
-        return self.config.get('Functions', 'TabLoggingFile')
+        try:
+            return self.config.get('Functions', 'TabLoggingFile')
+        except:
+            return self.defaults['Functions']['TabLoggingFile']
     
     def get_load_bookmarks(self):
-        return self.config.getboolean('Functions', 'LoadBookmarks')
+        try:
+            return self.config.getboolean('Functions', 'LoadBookmarks')
+        except:
+            return self.defaults['Functions']['LoadBookmarks']
+    
+    def get_use_hotkey(self):
+        try:
+            return self.config.getboolean('Functions', 'UseHotKey')
+        except:
+            return self.defaults['Functions']['UseHotKey']
     
     

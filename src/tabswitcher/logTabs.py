@@ -1,4 +1,5 @@
 import os
+import platform
 import schedule
 import time
 from collections import deque
@@ -8,7 +9,7 @@ from tabswitcher.Settings import Settings
 from tabswitcher.brotab import active_tab
 
 settings = Settings()
-
+script_dir = os.path.dirname(os.path.realpath(__file__))
 config_dir = os.path.expanduser('~/.tabswitcher')
 tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
 
@@ -49,6 +50,13 @@ def start_logging():
 
     # define when to check the active tab and how often
     schedule.every(settings.get_tab_logging_interval()).seconds.do(check_active_tab)
+
+    if settings.get_use_hotkey():
+        if platform.system() == 'Windows':
+            hotkey_path = os.path.join(script_dir, 'assets', "hotkey.exe")
+            os.system(f'start {hotkey_path}')
+        else:
+            print("Hotkey is only available on Windows")
 
     # Start the schedule in the main thread
     if settings.get_enable_tab_logging():
