@@ -61,7 +61,7 @@ def start_logging():
     # define when to check the active tab and how often
     schedule.every(settings.get_tab_logging_interval()).seconds.do(check_active_tab)
 
-    if platform.system() == "Windows" and settings.get_use_hotkey():
+    if platform.system() == "Windows" and settings.get_use_hotkeys():
         import keyboard
         
         hotkey = settings.get_hotkey_open()

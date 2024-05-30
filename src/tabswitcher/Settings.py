@@ -94,11 +94,11 @@ class Settings:
         except:
             return self.defaults['Functions']['LoadBookmarks']
     
-    def get_use_hotkey(self):
+    def get_use_hotkeys(self):
         try:
-            return self.config.getboolean('Functions', 'UseHotKey')
+            return self.config.getboolean('Functions', 'UseHotKeys')
         except:
-            return self.defaults['Functions']['UseHotKey']
+            return self.defaults['Functions']['UseHotKeys']
     
     def get_hotkey_open(self):
         try:

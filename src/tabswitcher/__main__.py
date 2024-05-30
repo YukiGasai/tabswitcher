@@ -328,7 +328,15 @@ def main():
             batch_script = os.path.join(script_dir, "assets", "install.sh")
             subprocess.run(["sh", batch_script])
 
-
+    elif len(sys.argv) > 1 and sys.argv[1] == "--uninstall":
+        if platform.system() == "Windows":
+            startup_folder = os.path.join(os.environ["APPDATA"], r"Microsoft\Windows\Start Menu\Programs\Startup")
+            vbs_path = os.path.join(startup_folder, "runLogger.vbs")
+            if os.path.exists(vbs_path):
+                os.remove(vbs_path)
+        else:
+            batch_script = os.path.join(script_dir, "assets", "uninstall.sh")
+            subprocess.run(["sh", batch_script])
     elif len(sys.argv) > 1 and sys.argv[1] == "--version":
         version = pkg_resources.get_distribution("tabswitcher").version
         print(f"Version: {version}")
@@ -338,6 +346,7 @@ def main():
         print("tabswitcher: No arguments will just open the switcher window")
         print("--startlogger\tRun the tab logger that will save the currenlty active tab")
         print("--install\tWill make sure the logger is startet on system start")
+        print("--uninstall\tWill make sure remove the logger from the start of the system")
         print("--latest\tWill return of the tab id of the last 10 active tabs you can also add a index as secons parameter")
         print("--version\tGet the version number")
         print("--help\t\tSee this page")
