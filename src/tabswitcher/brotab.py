@@ -13,6 +13,8 @@ from tabswitcher.focusWindow import focus_window
 from .Settings import Settings
 from .Tab import Tab
 
+# Wrapper funcitons around the brotab cli and the tabswitcher logger file
+
 settings = Settings()
 script_dir = os.path.dirname(os.path.realpath(__file__))
 config_dir = os.path.expanduser('~/.tabswitcher')
@@ -22,35 +24,43 @@ def get_url():
     mediator_port = settings.get_mediator_port()
     if mediator_port == 0:
         return None
-    elif mediator_port not in range(4625, 4627):
-        raise ValueError("Mediator port must be between 4625 and 4626 or 0 for automatic selection.")
     return f'127.0.0.1:{mediator_port}'
 
-def get_tabs(manager):
+
+def get_tabs_base():
     try:
         url = get_url()
         if url is None:
-            output = subprocess.check_output(['bt', 'list'], timeout=5).decode()
+            output = subprocess.check_output(['bt', 'list'], timeout=5)
         else:
-            output = subprocess.check_output(['bt', '--target', url, 'list'], timeout=5).decode()
+            output = subprocess.check_output(['bt', '--target', url, 'list'], timeout=5)
 
-        lines = output.strip().split('\n')
+        if not output:
+            return None
+
+        encoding = chardet.detect(output)['encoding']
+        output = output.decode(encoding).strip()
+
+        lines = output.split('\n')
         lines = [line for line in lines if len(line)]
-        
-        titles = [line.split('\t')[1] for line in lines]
 
-        # Check if there are duplicate titles 
+        return [line.split('\t') for line in lines]
+    except:
+        return []
+
+def get_tabs(manager):
+    try:
+        tab_list = get_tabs_base()
+        titles = [tab[1] for tab in tab_list]
         duplicate_titles = set(title for title in titles if titles.count(title) > 1)
 
         tabs = {}
-        for line in lines:
-            id, title, url = line.split('\t')
-            # To prevent the same key add the id to dublicate titles 
+        for tab in tab_list:
+            id, title, url = tab
             if title in duplicate_titles:
                 title = f"{id} : {title}"
             tab = Tab(id, title, url, manager)
             tabs[title] = tab
-        
         return tabs
     except:
         return {}
@@ -74,7 +84,6 @@ def activate_tab(tab_id, focus):
 
 def switch_tab(tab_id, tab_title=None):
     
-
     app = QGuiApplication.instance()
     modifiers = app.queryKeyboardModifiers()
 
@@ -91,7 +100,6 @@ def delete_tab(tab_id):
         subprocess.call(['bt', 'close', tab_id])
     else:
         subprocess.call(['bt', '--target', url, 'close', tab_id])
-
 
 def seach_tab(manager, text):
     try:
@@ -125,48 +133,42 @@ def active_tab():
     try:
         url = get_url()
         if url is None:
-            output = subprocess.check_output(['bt', 'active'], timeout=1).decode()
+            output = subprocess.check_output(['bt', 'query', '+active', '+lastFocusedWindow'], timeout=3)
         else:
-            output = subprocess.check_output(['bt', '--target', url, 'active'], timeout=1).decode()
+            output = subprocess.check_output(['bt', '--target', url, 'query', '+active', '+lastFocusedWindow'], timeout=3)
         
-        lines = output.strip().split('\n')
-        lines = [line for line in lines if len(line)]
-        if len(lines) == 0:
+        if not output:
             return None
-        data = lines[0].split('\t')
-        if (len(data) == 5):
-            return data[0]
+
+        encoding = chardet.detect(output)['encoding']
+        output = output.decode(encoding).strip()
+        
+        tab = output.split('\t')
+        # Check if the tab data is complete
+        if len(tab) == 3:
+            return tab
+        
         return None
     except:
         return None
     
-def get_recent_tabs(index=None):
+def get_recent_tabs():
     try:
         with open(tab_history_path, 'rb') as f:
-            tab_ids = pickle.load(f)
-            if index:
-                index = int(index)
-                if index < len(tab_ids):
-                    return tab_ids[index]
-                else:
-                    return None
-            return tab_ids
-            
-    except FileNotFoundError:
-        print("File not found: " + tab_history_path, file=sys.stderr)
-        exit(1)
-    except ValueError:
-        print("Invalid index: " + index, file=sys.stderr)
-        exit(1)
+            lines = pickle.load(f)
+            tabs = [line.split('\t') for line in lines]
+            return tabs
+    except:
+        return []
 
 def print_recent_tabs(index=None):
     try:
-        tabs = get_recent_tabs(index)
-        if isinstance(tabs, list):
+        tabs = get_recent_tabs()
+        if index is None:
             for tab in tabs:
-                print(tab)
+                print("\t".join(tab))
         else:
-            print(tabs)
+            print("\t".join(tabs[int(index)]))
             
     except FileNotFoundError:
         print("File not found: " + tab_history_path, file=sys.stderr)

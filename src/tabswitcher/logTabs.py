@@ -7,8 +7,10 @@ import time
 from collections import deque
 import pickle
 from tabswitcher.Settings import Settings
-from tabswitcher.actions import activate_tab
-from tabswitcher.brotab import active_tab, get_recent_tabs, activate_tab
+from tabswitcher.brotab import active_tab, get_recent_tabs, get_tabs_base, activate_tab
+
+# The main script to log the tab activity of a user. This file is started by running tabswitcher --startlogger
+# It will log the active tab in an intervall and enables global hotkeys
 
 settings = Settings()
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -27,13 +29,24 @@ def show_list():
     for tab in tabHistory:
         print(tab)
     
-# Check the active tab every second and log it to the tabHistory
 def check_active_tab():
-    tab_id = active_tab()
-    if tab_id in tabHistory:
-        tabHistory.remove(tab_id)
-    tabHistory.appendleft(tab_id)
 
+    active_tab_item = active_tab()    
+    all_tabs = get_tabs_base()
+
+    for current_tab_line in list(tabHistory):
+        current_tab = current_tab_line.split('\t')
+
+        if active_tab_item is not None and active_tab_item[0] == current_tab[0]:
+            tabHistory.remove(current_tab_line)
+            
+        elif current_tab not in all_tabs:
+            tabHistory.remove(current_tab_line)
+
+
+    if active_tab_item is not None:
+        tabHistory.appendleft("\t".join(active_tab_item))
+    
     with open(tab_history_path, 'wb') as f:
         pickle.dump(list(tabHistory), f)
     # show_list()
@@ -48,9 +61,9 @@ def runTabSwitcher():
     subprocess.Popen("tabswitcher")
 
 def focusLastTab():
-    last_tab = get_recent_tabs(1)
-    if last_tab is not None:
-        activate_tab(last_tab, False)
+    last_tabs = get_recent_tabs()
+    if last_tabs is not None and len(last_tabs) > 1:
+        activate_tab(last_tabs[1][0], False)
     return
 
 def start_logging():
@@ -70,6 +83,6 @@ def start_logging():
         hotkey = settings.get_hotkey_last()
         keyboard.add_hotkey(hotkey, focusLastTab, suppress=True)
 
-    # Start the schedule in the main thread
+    # Start the schedule in the main threadaa
     if settings.get_enable_tab_logging():
         run_schedule()

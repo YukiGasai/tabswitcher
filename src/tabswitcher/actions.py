@@ -10,6 +10,8 @@ from PyQt5.QtGui import QDesktopServices
 from tabswitcher.Settings import Settings
 from tabswitcher.brotab import switch_tab
 
+# Actions that can be triggered from the ui
+
 settings = Settings()
 
 def open_settings():

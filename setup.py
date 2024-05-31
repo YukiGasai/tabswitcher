@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tabswitcher',
-    version='0.1.9',
+    version='0.1.10',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
@@ -33,11 +33,9 @@ setup(
     install_requires=[
         'chardet<4',
         'werkzeug<3.0', # werkzeug 3.0 breaks flask and by extension brotab
-        'psutil==5.9.4', # psutil is the first version that supports the wheels for multiple python versions
-        'fuzzywuzzy',
+        'fuzzyfinder',
         'PyQt5',
         'schedule',
-        'brotab',
         'pynput;platform_system=="Windows"',
         'pywin32;platform_system=="Windows"',
         'keyboard;platform_system=="Windows"'

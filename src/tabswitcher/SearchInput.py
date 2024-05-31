@@ -8,6 +8,7 @@ from .colors import getBackgroundColor, getTextColor
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
+# The search input to fuzzy find tabs with Search Icon
 class SearchInput(QLineEdit):
 
     def update_count(self):

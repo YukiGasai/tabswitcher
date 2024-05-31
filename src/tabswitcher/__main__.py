@@ -1,6 +1,4 @@
 import os
-import pickle
-
 import platform
 import shutil
 import sys
@@ -21,7 +19,7 @@ from tabswitcher.shortcuts import setup_shortcuts
 from .SearchInput import SearchInput
 from .Settings import Settings
 from .TabList import TabList
-from .brotab import delete_tab, get_tabs, print_recent_tabs, seach_tab
+from .brotab import delete_tab, get_recent_tabs, get_tabs, print_recent_tabs, seach_tab
 from .colors import getBackgroundColor, getPlaceholderColor, getWindowBackgroundColor
 from .fuzzySearch import fuzzy_search_cmd, fuzzy_search_py
 
@@ -215,18 +213,23 @@ class MainWindow(QWidget):
         return ar
 
     def get_last_active_tabs(self):
-        try:
-            with open(tab_history_path, 'rb') as f:
-                tab_ids = pickle.load(f)
-                tabs = {}
-                for tab_id in tab_ids:
-                    for _, tab in self.tabs.items():
-                        if tab.id == tab_id:
-                            tabs[tab.title] = tab
-                return tabs
-            
-        except FileNotFoundError:
-            return {}
+        tab_list = get_recent_tabs()
+        titles = [tab[1] for tab in tab_list]
+
+        # Check if there are duplicate titles 
+        duplicate_titles = set(title for title in titles if titles.count(title) > 1)
+
+        tabs = {}
+        for tab in tab_list:
+            id, title, url = tab
+            # To prevent the same key add the id to dublicate titles 
+            if title in duplicate_titles:
+                title = f"{id} : {title}"
+            tab = Tab(id, title, url, self.manager)
+            tabs[title] = tab
+
+        return tabs    
+
 
     def get_last_active_tab(self, index):
         tabs = self.get_last_active_tabs()
@@ -318,6 +321,7 @@ def main():
             print_recent_tabs()
     elif len(sys.argv) > 1 and sys.argv[1] == "--install":
         if platform.system() == "Windows":
+            subprocess.run(["pip", "install", "brotab"], check=True)
             subprocess.run(["bt", "install"], check=True)
             startup_script = os.path.join(script_dir, "assets", "runLogger.vbs")
             startup_folder = os.path.join(os.environ["APPDATA"], r"Microsoft\Windows\Start Menu\Programs\Startup")

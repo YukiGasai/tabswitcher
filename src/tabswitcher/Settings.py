@@ -3,6 +3,7 @@ import os
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
+# A helper class that wraps all the Settings logic to load the settings and use its values in the rest of the app
 class Settings:
     def __init__(self):
         # Define default values

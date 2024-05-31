@@ -6,6 +6,8 @@ from tabswitcher.Settings import Settings
 
 settings = Settings()
 
+# Function to load the hotkeys from the default locations for firefox and chrome
+
 def load_chrome_bookmarks():
 
     # Path to the Chrome bookmarks file
@@ -20,7 +22,7 @@ def load_chrome_bookmarks():
 
     # Initialize an empty list to store the bookmarks
     bookmarks = []
-    # Recursive function to extract bookmarks from the nested structure
+    # Recursive function to extract bookmarks from thse nested structure
     def extract_bookmarks(node):
         for child in node:
             if not isinstance(child, dict):
@@ -65,28 +67,35 @@ def load_firefox_bookmark():
             largest_profile = profile
             max_size = profile_size
 
-    # If no profile was found, raise an error
     if largest_profile is None:
         return []
 
     places_file = os.path.join(profiles_dir, profile, "places.sqlite")
 
-    # Connect to the SQLite database
-    conn = sqlite3.connect(places_file)
+    if not os.path.exists(places_file):
+        return []
 
-    # Create a cursor
-    cur = conn.cursor()
+    try:
+        # Connect to the SQLite database
+        conn = sqlite3.connect(places_file)
 
-    # Execute a query to get the bookmarks
-    cur.execute("SELECT moz_bookmarks.title, moz_places.url FROM moz_bookmarks JOIN moz_places ON moz_bookmarks.fk = moz_places.id")
+        # Create a cursor
+        cur = conn.cursor()
 
-    # Fetch all the results
-    bookmarks = cur.fetchall()
+        # Execute a query to get the bookmarks
+        cur.execute("SELECT moz_bookmarks.title, moz_places.url FROM moz_bookmarks JOIN moz_places ON moz_bookmarks.fk = moz_places.id")
 
-    # Close the 
-    # connection
-    conn.close()
-    return bookmarks
+        # Fetch all the results
+        bookmarks = cur.fetchall()
+
+        # Close the 
+        # connection
+        conn.close()
+        return bookmarks
+    except Exception as e:
+        print("Error reading the firefox bookmarks file")
+        print(e)
+        return []
 
 def load_bookmarks():
 

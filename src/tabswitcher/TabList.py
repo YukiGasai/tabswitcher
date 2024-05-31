@@ -5,7 +5,7 @@ from tabswitcher.actions import activate_tab
 
 from .colors import getBackgroundColor, getSelectedColor, getTextColor
 
-
+# The List that displayes the tabs(results) from the search
 class TabList(QListWidget):
     def __init__(self, parent=None):
         super(TabList, self).__init__(parent)

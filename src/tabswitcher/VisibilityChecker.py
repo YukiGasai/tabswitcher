@@ -1,9 +1,10 @@
-
 import time
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from tabswitcher.focusWindow import focus_window
 
+# This is a small worker class that runs in another thread to check if the tabswitcher window is ready for input
+# After the window is ready for input it is focused
 class VisibilityChecker(QThread):
     finished = pyqtSignal()
 

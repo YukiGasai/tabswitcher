@@ -1,5 +1,7 @@
 from .Settings import Settings
 
+# Gets colors by selected theme for ui components 
+
 settings = Settings()
 def getTextColor():
     if(settings.get_dark_mode()):

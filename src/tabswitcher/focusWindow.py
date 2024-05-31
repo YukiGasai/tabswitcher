@@ -4,6 +4,7 @@ import subprocess
 class WindowFoundException(Exception):
     pass
 
+# The helper function that allows to focus a windwo by title reliable at least on windows 11
 def focus_window(title):
     try:
         if platform.system() == "Windows":

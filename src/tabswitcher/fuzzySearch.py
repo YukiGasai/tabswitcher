@@ -1,19 +1,12 @@
 import subprocess
-from fuzzywuzzy import process, fuzz
-
-# This is the better idea to use a python fzf but it is not working as good
-def scorer(query, choice):
-    if choice.startswith(query):
-        return 100
-    else:
-        return fuzz.ratio(query, choice)
+from fuzzyfinder import fuzzyfinder
 
 def fuzzy_search_py(query, choices):
     if not query:
         return []
-    results = process.extract(query, choices, limit=10, processor=lambda x: x.lower())
-    results = [result[0] for result in results if result[1] > 30]
-    return results
+    query = query.strip()
+    results = fuzzyfinder(query.lower(), choices)
+    return list(results)[:10]
 
 # This is not so nice as it requres fzf to be installed but it just works so good
 def fuzzy_search_cmd(query, choices):

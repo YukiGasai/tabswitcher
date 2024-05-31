@@ -1,5 +1,7 @@
 #!/bin/sh
 
+pip install brotab --user
+
 # Install the brotab mediator
 bt install
 
