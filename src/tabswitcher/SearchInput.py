@@ -11,6 +11,21 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 # The search input to fuzzy find tabs with Search Icon
 class SearchInput(QLineEdit):
 
+    def changeListMode(self):
+        input_value = self.text()
+        if input_value == "":
+            self.setText(" ")
+        elif input_value.startswith(" "):
+            self.setText("#" + input_value[1:])
+        elif input_value.startswith("#"):
+            self.setText(">" + input_value[1:])
+        elif input_value.startswith(">"):
+            self.setText("!" + input_value[1:])
+        elif input_value.startswith("!"):
+            self.setText("?" + input_value[1:])
+        else:
+            self.setText("" + input_value[1:])
+
     def update_count(self):
         self.listCountLabel.setText(str(self.parent().list.count()))
 
@@ -28,7 +43,8 @@ class SearchInput(QLineEdit):
         icon_path = os.path.join(script_dir, 'assets', 'searchIcon.svg')
         button.setIcon(QIcon(icon_path))
         button.setIconSize(QSize(32, 32))
-        button.setEnabled(False)
+        button.setCursor(Qt.PointingHandCursor)
+        button.clicked.connect(self.changeListMode)
         button.setStyleSheet("QToolButton { border: none; padding: 0px; background: transparent; }")
         self.listCountLabel = QLabel()
         self.setFont(font)

@@ -3,8 +3,8 @@ import platform
 import shutil
 import sys
 from PyQt5.QtGui import QFont, QCursor, QIcon
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
+from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QListWidget, QMenu, QAction
 from PyQt5.QtNetwork import QNetworkAccessManager
 import subprocess
 
@@ -70,9 +70,34 @@ class MainWindow(QWidget):
     def update_list_label(self):
         self.listCountLabel.setText(f"{self.list.count()} tabs")
 
+    def eventFilter(self, source, event):
+
+        if event.type() == QEvent.MouseButtonPress and event.button() == Qt.MiddleButton:
+            if self.list.count() > 0:
+                activate_tab(self, self.list.item(self.list.currentRow()))
+            return True  # event was handled
+        elif (event.type() == QEvent.Wheel and source is self):
+            if self.first_scroll:
+                self.list.setCurrentRow(0)
+                self.first_scroll = False
+            else:
+                if event.angleDelta().y() > 0:
+                    if self.list.currentRow() == 0:
+                        self.list.setCurrentRow(self.list.count() - 1)
+                    else:
+                        self.list.setCurrentRow(self.list.currentRow() - 1)
+                else:
+                    if self.list.currentRow() == self.list.count() - 1:
+                        self.list.setCurrentRow(0)
+                    else:
+                        self.list.setCurrentRow(self.list.currentRow() + 1)
+            return True  # event was handled
+        return super().eventFilter(source, event)        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        QApplication.instance().installEventFilter(self)
+        self.first_scroll = True
         # Open on monitor with mouse
         screen_number = QApplication.desktop().screenNumber(QCursor.pos())
         screen_geometry = QApplication.desktop().screenGeometry(screen_number)
@@ -116,6 +141,9 @@ class MainWindow(QWidget):
         self.input.textChanged.connect(self.update_list)
         self.list.itemActivated.connect(lambda item: activate_tab(self, item))
 
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.emptySpaceMenu)
+
         self.info_label = QLabel(self)
         self.info_label.setAlignment(Qt.AlignCenter)
         self.info_label.setStyleSheet("""
@@ -138,6 +166,20 @@ class MainWindow(QWidget):
         }
     """ % (getWindowBackgroundColor())
         )
+
+    def emptySpaceMenu(self):
+        menu = QMenu()
+        menu.addAction('You clicked on the empty space')
+        menu.exec_(QCursor.pos())
+
+    def contextMenuEvent(self, event):
+        print("HII")
+        context_menu = QMenu(self)
+
+        open_settings_action = QAction("Open Settings", self)
+        open_settings_action.triggered.connect(open_settings)
+        context_menu.addAction(open_settings_action)
+        context_menu.exec_(event.globalPos())
 
     def checkFocus(self, old, new):
         # If the new focus widget is not this widget or a child of this widget
@@ -300,6 +342,7 @@ class MainWindow(QWidget):
 
         self.info_label.show()
         self.list.hide()
+
 
 
 def open_tabswitcher():
