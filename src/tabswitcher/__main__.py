@@ -14,6 +14,7 @@ from tabswitcher.Tab import Tab
 from tabswitcher.VisibilityChecker import VisibilityChecker
 from tabswitcher.actions import activate_tab, open_settings, openFirstGoogleResult, searchGoogeInNewTab
 from tabswitcher.loadBookmarks import load_bookmarks
+from tabswitcher.loadHistory import load_history, load_most_visited
 from tabswitcher.shortcuts import setup_shortcuts
 
 from .SearchInput import SearchInput
@@ -44,6 +45,18 @@ class MainWindow(QWidget):
         return self._bookmarks
     
     @property
+    def history(self):
+        if not hasattr(self, '_history'):
+            self._history = self.load_history_items()
+        return self._history
+    
+    @property
+    def most_visited(self):
+        if not hasattr(self, '_most_visited'):
+            self._most_visited = self.load_most_visited_items()
+        return self._most_visited
+    
+    @property
     def recent_tabs(self):
         if not hasattr(self, '_recent_tabs'):
             self._recent_tabs = self.get_last_active_tabs(self.manager)
@@ -57,6 +70,14 @@ class MainWindow(QWidget):
     @bookmarks.setter
     def bookmarks(self, value):
         self._bookamarks = value
+
+    @history.setter
+    def history(self, value):
+        self._history = value
+
+    @most_visited.setter
+    def most_visited(self, value):
+        self._most_visited = value
 
     @recent_tabs.setter
     def recent_tabs(self, value):
@@ -121,8 +142,10 @@ class MainWindow(QWidget):
         self.manager = QNetworkAccessManager()
 
         self.tabs = get_tabs(self.manager)
-        self.bookmarks = self.load_bookmarks_items()
         self.recent_tabs = self.get_last_active_tabs()
+        self.bookmarks = self.load_bookmarks_items()
+        self.history = self.load_history_items()
+        self.most_visited = self.load_most_visited_items()
 
         self.layout = QVBoxLayout()
 
@@ -173,7 +196,6 @@ class MainWindow(QWidget):
         menu.exec_(QCursor.pos())
 
     def contextMenuEvent(self, event):
-        print("HII")
         context_menu = QMenu(self)
 
         open_settings_action = QAction("Open Settings", self)
@@ -253,6 +275,36 @@ class MainWindow(QWidget):
                 seen_titles.add(title)
                 seen_urls.add(url)
         return ar
+    
+
+    def load_history_items(self):
+        history = load_history()
+        ar = {}
+        # Ensure that there are no duplicate bookmarks
+        seen_titles = set()
+        seen_urls = set()
+        for bookmark_item in history:
+            title, url = bookmark_item[0], bookmark_item[1]
+            if title not in seen_titles and url not in seen_urls:
+                ar[title] = Tab(-1, title, url, self.manager)
+                seen_titles.add(title)
+                seen_urls.add(url)
+        return ar
+    
+    def load_most_visited_items(self):
+        most_visited = load_most_visited()
+        ar = {}
+        # Ensure that there are no duplicate bookmarks
+        seen_titles = set()
+        seen_urls = set()
+        for bookmark_item in most_visited:
+            title, url = bookmark_item[0], bookmark_item[1]
+            if title not in seen_titles and url not in seen_urls:
+                ar[title] = Tab(-1, title, url, self.manager)
+                seen_titles.add(title)
+                seen_urls.add(url)
+        return ar
+
 
     def get_last_active_tabs(self):
         tab_list = get_recent_tabs()
@@ -298,6 +350,12 @@ class MainWindow(QWidget):
         if text.startswith('#'):
             text = text[1:].strip()
             tabs_to_filter = self.bookmarks
+        elif text.startswith('@'):
+            text = text[1:].strip()
+            tabs_to_filter = self._history
+        elif text.startswith('$'):
+            text = text[1:].strip()
+            tabs_to_filter = self._most_visited
         # If there is no text, show the last active tabs
         elif text == "" and settings.get_enable_tab_logging():
             tabs_to_filter = self.recent_tabs

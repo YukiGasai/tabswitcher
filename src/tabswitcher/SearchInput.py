@@ -18,6 +18,10 @@ class SearchInput(QLineEdit):
         elif input_value.startswith(" "):
             self.setText("#" + input_value[1:])
         elif input_value.startswith("#"):
+            self.setText("@" + input_value[1:])
+        elif input_value.startswith("@"):
+            self.setText("$" + input_value[1:])
+        elif input_value.startswith("$"):
             self.setText(">" + input_value[1:])
         elif input_value.startswith(">"):
             self.setText("!" + input_value[1:])

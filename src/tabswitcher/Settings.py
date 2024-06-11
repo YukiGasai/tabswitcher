@@ -23,6 +23,8 @@ class Settings:
                 'UseHotKeys': True,
                 'HotkeyOpen': 'esc+s',
                 'HotkeyLast': 'esc+a',
+                'LoadHistory': True,
+                'MaxHistory': 100,
             }
         }
         config_dir = os.path.expanduser('~/.tabswitcher')
@@ -112,6 +114,19 @@ class Settings:
             return self.config.get('Functions', 'HotkeyLast')
         except:
             return self.defaults['Functions']['HotkeyLast']
+    
+    def get_use_history(self):
+        try:
+            return self.config.getboolean('Functions', 'LoadHistory')
+        except:
+            return self.defaults['Functions']['LoadHistory']
+
+    def get_max_history(self):
+        try:
+            return self.config.getint('Functions', 'MaxHistory')
+        except:
+            return self.defaults['Functions']['HotkeyLast']
+    
     
     
     

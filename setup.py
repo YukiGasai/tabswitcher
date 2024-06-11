@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tabswitcher',
-    version='0.1.11',
+    version='0.1.12',
     packages=['tabswitcher'],
     package_dir={'tabswitcher': 'src/tabswitcher'},
     package_data={'tabswitcher': ['assets/*']},
@@ -31,13 +31,12 @@ setup(
     ],
     keywords='tabswitcher, browsertool, tool',
     install_requires=[
-        'chardet<4',
         'werkzeug<3.0', # werkzeug 3.0 breaks flask and by extension brotab
         'fuzzyfinder',
         'PyQt5',
         'schedule',
         'pynput;platform_system=="Windows"',
         'pywin32;platform_system=="Windows"',
-        'keyboard;platform_system=="Windows"'
+        'pyWinhook;platform_system=="Windows',
     ],
 )

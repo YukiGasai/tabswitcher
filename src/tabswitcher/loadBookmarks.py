@@ -3,6 +3,7 @@ import json
 import os
 
 from tabswitcher.Settings import Settings
+from tabswitcher.firefoxHelper import get_firefox_sqlite_file
 
 settings = Settings()
 
@@ -45,34 +46,9 @@ def load_chrome_bookmarks():
 
 def load_firefox_bookmark():
 
-    # Path to the Firefox profiles directory
-    profiles_dir = os.path.expanduser("~/AppData/Roaming/Mozilla/Firefox/Profiles/")
+    places_file = get_firefox_sqlite_file()
 
-    if not os.path.exists(profiles_dir):
-        return []
-
-    # Get the list of profiles
-    profiles = [os.path.join(profiles_dir, prof) for prof in os.listdir(profiles_dir) if os.path.isdir(os.path.join(profiles_dir, prof))]
-
-    largest_profile = None
-    max_size = 0
-
-    # Iterate over the profiles
-    for profile in profiles:
-        # Get the size of the profile
-        profile_size = sum(os.path.getsize(os.path.join(profile, f)) for f in os.listdir(profile) if os.path.isfile(os.path.join(profile, f)))
-        
-        # If the profile is larger than the max size, update the largest profile and the max size
-        if profile_size > max_size:
-            largest_profile = profile
-            max_size = profile_size
-
-    if largest_profile is None:
-        return []
-
-    places_file = os.path.join(profiles_dir, profile, "places.sqlite")
-
-    if not os.path.exists(places_file):
+    if places_file is None:
         return []
 
     try:

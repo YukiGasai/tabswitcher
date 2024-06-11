@@ -1,12 +1,13 @@
 import os
 import platform
 import subprocess
+import threading
 import schedule
 import time
 from collections import deque
 import pickle
 from tabswitcher.Settings import Settings
-from tabswitcher.brotab import active_tab, get_recent_tabs, get_tabs_base, activate_tab
+from tabswitcher.brotab import active_tab, get_recent_tabs, get_tabs_base, activate_tab        
 
 # The main script to log the tab activity of a user. This file is started by running tabswitcher --startlogger
 # It will log the active tab in an intervall and enables global hotkeys
@@ -23,7 +24,7 @@ def show_list():
     global counter
     counter += 1
     #Clear screen
-    os.system('cls' if os.name == 'nt' else 'clear')
+    # os.system('cls' if os.name == 'nt' else 'clear')
     print(f"Run {counter}")
     for tab in tabHistory:
         print(tab)
@@ -48,7 +49,7 @@ def check_active_tab():
     
     with open(tab_history_path, 'wb') as f:
         pickle.dump(list(tabHistory), f)
-    # show_list()
+    #show_list()
     
 # Start the scheculer just to make sure nothing is skipped
 def run_schedule():
@@ -65,6 +66,31 @@ def focusLastTab():
         activate_tab(last_tabs[1][0], False)
     return
 
+current_keys = set()
+
+hotkeys = {
+    settings.get_hotkey_open(): lambda: runTabSwitcher(),
+    settings.get_hotkey_last(): lambda: focusLastTab(),
+}
+
+hotkeys = {frozenset(hotkey.split('+')): func for hotkey, func in hotkeys.items()}
+
+def OnKeyboardEvent(event):
+    global current_keys
+
+    if event.MessageName == 'key down':
+        current_keys.add(event.Key)
+
+        for hotkey, func in hotkeys.items():
+            if hotkey.issubset(current_keys):
+                func()
+                return False     
+
+    elif event.MessageName == 'key up' and event.Key in current_keys:
+        current_keys.remove(event.Key)
+
+    return True
+
 def start_logging():
     # Clear the history file
     if os.path.exists(tab_history_path):
@@ -73,15 +99,21 @@ def start_logging():
     # define when to check the active tab and how often
     schedule.every(settings.get_tab_logging_interval()).seconds.do(check_active_tab)
 
-    if platform.system() == "Windows" and settings.get_use_hotkeys():
-        import keyboard
-        
-        hotkey = settings.get_hotkey_open()
-        keyboard.add_hotkey(hotkey, runTabSwitcher, suppress=True)
-
-        hotkey = settings.get_hotkey_last()
-        keyboard.add_hotkey(hotkey, focusLastTab, suppress=True)
-
-    # Start the schedule in the main threadaa
+    # Load the tab history from the file
     if settings.get_enable_tab_logging():
-        run_schedule()
+        schedule_thread = threading.Thread(target=run_schedule)
+        schedule_thread.start()
+
+    # Start the hotkey 
+    if platform.system() == "Windows" and settings.get_use_hotkeys():
+
+        import pythoncom
+        import pyWinhook as pyHook
+
+        hooks_manager = pyHook.HookManager()
+        hooks_manager.KeyDown = OnKeyboardEvent
+        hooks_manager.KeyUp = OnKeyboardEvent
+        hooks_manager.HookKeyboard()
+        pythoncom.PumpMessages()
+
+

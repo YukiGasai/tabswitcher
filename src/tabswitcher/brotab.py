@@ -3,7 +3,6 @@ import os
 import pickle
 import subprocess
 import sys
-import chardet
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QGuiApplication
@@ -19,6 +18,9 @@ settings = Settings()
 script_dir = os.path.dirname(os.path.realpath(__file__))
 config_dir = os.path.expanduser('~/.tabswitcher')
 tab_history_path = os.path.join(config_dir, settings.get_tab_logging_file())
+
+env = os.environ.copy()
+env['PYTHONIOENCODING'] = 'utf-8'
 
 def get_url():
     mediator_port = settings.get_mediator_port()
@@ -38,8 +40,7 @@ def get_tabs_base():
         if not output:
             return None
 
-        encoding = chardet.detect(output)['encoding']
-        output = output.decode(encoding).strip()
+        output = output.decode('utf-8').strip()
 
         lines = output.split('\n')
         lines = [line for line in lines if len(line)]
@@ -105,17 +106,16 @@ def seach_tab(manager, text):
     try:
         url = get_url()
         if url is None:
-            _ = subprocess.check_output(['bt', 'index'], timeout=20).decode()
+            _ = subprocess.check_output(['bt', 'index'], timeout=20)
             output_bytes = subprocess.check_output(['bt', 'search', text], timeout=20)
         else:
-            _ = subprocess.check_output(['bt', '--target', url, 'index'], timeout=20).decode()
+            _ = subprocess.check_output(['bt', '--target', url, 'index'], timeout=20)
             output_bytes = subprocess.check_output(['bt', '--target', url, 'search', text], timeout=20)
     
         if not output_bytes:
             return []
         
-        encoding = chardet.detect(output_bytes)['encoding']
-        output = output_bytes.decode(encoding)
+        output = output_bytes.decode('utf-8').strip()
 
         lines = output.strip().split('\n')
         lines = [line for line in lines if len(line)]
@@ -133,17 +133,26 @@ def active_tab():
     try:
         url = get_url()
         if url is None:
-            output = subprocess.check_output(['bt', 'query', '+active', '+lastFocusedWindow'], timeout=3)
+            output = subprocess.check_output(
+                ['bt', 'query', '+active', '+lastFocusedWindow'],
+                encoding='utf-8',
+                env=env,
+                timeout=20
+            )
         else:
-            output = subprocess.check_output(['bt', '--target', url, 'query', '+active', '+lastFocusedWindow'], timeout=3)
+            output = subprocess.check_output(
+            ['bt', '--target', url, 'query', '+active', '+lastFocusedWindow'],
+            encoding='utf-8',
+            env=env,
+            timeout=10
+        )
         
         if not output:
             return None
 
-        encoding = chardet.detect(output)['encoding']
-        output = output.decode(encoding).strip()
+
         
-        tab = output.split('\t')
+        tab = output.strip().split('\t')
         # Check if the tab data is complete
         if len(tab) == 3:
             return tab
