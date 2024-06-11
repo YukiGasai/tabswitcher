@@ -37,6 +37,6 @@ setup(
         'schedule',
         'pynput;platform_system=="Windows"',
         'pywin32;platform_system=="Windows"',
-        'pyWinhook;platform_system=="Windows',
+        'pyWinhook;platform_system=="Windows"',
     ],
 )
